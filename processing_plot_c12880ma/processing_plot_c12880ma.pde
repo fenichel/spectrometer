@@ -28,62 +28,57 @@ int max_wavelength = 891;
 int width_multiplier = 8;
 int bottom_spacing = 40;
 
-double find_max(double[] input)
-{
+/** Return the maximum value in an array of doubles. **/
+double find_max(double[] input) {
   double max = 0;
-  for (int i = 0; i < input.length; i++) 
-  {
-    if (input[i] > max)
-    {
+  for (int i = 0; i < input.length; i++) {
+    if (input[i] > max) {
       max = input[i];
     }
   }
   return max;
 }
 
-void plotdata()
-{
-
-  double summed_max = (find_max(summed))/875;
-
+void plotdata() {
   background(300); 
-  {
-    for (int i=0; i<output.length; i++)
-    {
-      //line(width_multiplier*(wavelengths[i]-315), window_height, width_multiplier*(wavelengths[i]-315), (window_height-output[i]*window_height/850));
-      //strokeWeight(width_multiplier*2);
-      //stroke(waveLengthToRGB(wavelengths[i])[0],waveLengthToRGB(wavelengths[i])[1],waveLengthToRGB(wavelengths[i])[2]);
+  for (int i = 0; i < output.length; i++) {
+    float x = width_multiplier * (wavelengths[i] - 315);
+    float y1 = window_height - bottom_spacing;
+    float y2 = window_height - irrad[i] * window_height / 0.6;
+    
+    line(x, y1, x, y2);
+    strokeWeight(width_multiplier + 3);
+    
+    int[] rgbWavelengths = waveLengthToRGB(wavelengths[i]);
+    stroke(rgbWavelengths[0], rgbWavelengths[1], rgbWavelengths[2]);
 
-
-      line(width_multiplier*(wavelengths[i]-315), window_height - bottom_spacing, width_multiplier*(wavelengths[i]-315), (window_height-irrad[i]*window_height/0.6));
-      strokeWeight(width_multiplier+3);
-      stroke(waveLengthToRGB(wavelengths[i])[0], waveLengthToRGB(wavelengths[i])[1], waveLengthToRGB(wavelengths[i])[2]);
-
-      if (i % 13 == 0) {
-        println(int(wavelengths[i]));
-        textSize(20);
-        text(int(wavelengths[i]), width_multiplier*(wavelengths[i]- 315), window_height-10);
-        fill(200);
-      }
+    if (i % 13 == 0) {
+      println(int(wavelengths[i]));
+      textSize(20);
+      text(int(wavelengths[i]), width_multiplier*(wavelengths[i]- 315), window_height-10);
+      fill(200);
     }
   }
 }
 
 float scale_wavelength(int pix) {
-  return A0 + B1*pix+B2*pix*pix+B3*pix*pix*pix+B4*pix*pix*pix*pix+B5*pix*pix*pix*pix*pix;
+  return A0 +
+    B1 * pix +
+    B2 * pix * pix +
+    B3 * pix * pix * pix +
+    B4 * pix * pix * pix * pix +
+    B5 * pix * pix * pix * pix * pix;
 }
 
 float scale_linearity(int count) {
-
-  //#c[linear] = c / ( a * ln(( c + 1 ) * b ) )
-  return (count/(lin_a*log((count+1)*lin_b)));
+  return (count / (lin_a * log((count + 1) * lin_b)));
 }
+
 void settings() {
-  size(width_multiplier*(566), window_height);
+  size(width_multiplier * 566, window_height);
 }
 
-void setup() 
-{
+void setup() {
 
   println(Serial.list());
   String portName = Serial.list()[0]; //This is the index into the serial list, if you only have one serial device the index is 0
@@ -94,66 +89,29 @@ void setup()
   irrad = new float[288];
   wavelengths = new float[288];
 
-  //wavelengths = new double[288];
   colorMode(RGB, 400);
 
-  for (int i = 0; i < 288; i++) 
-  {
+  for (int i = 0; i < 288; i++) {
     summed[i] = 0;
     output[i] = 0;
     wavelengths[i] = scale_wavelength(i);
   }
-  for (int i = 0; i < 288; i++) {
-    // println(wavelengths[i] + '\n');
-  }
 }
 
-void draw()
-{
-
-
-  if ( myPort.available() > 0) 
-  {  
+void draw() {
+  if ( myPort.available() > 0) {  
     val = myPort.readStringUntil('\n');         // read it and store it in val
-    if (val != null)
-    {
+    if (val != null) {
       data = int(split(val, ','));
-      for (int i = 0; i < data.length; i++) 
-      {
-        if (i<summed.length)
-        {
-          output[i] = scale_linearity(data[i]-dark_value);
-          irrad[i] = scale_linearity(data[i]-dark_value)/irradiance_cal[i];
-          summed[i] +=  data[i];
+      for (int i = 0; i < data.length; i++) {
+        if (i < summed.length) {
+          output[i] = scale_linearity(data[i] - dark_value);
+          irrad[i] = scale_linearity(data[i] - dark_value) / irradiance_cal[i];
+          summed[i] += data[i];
         }
-        //print(data[i]);
-        //print(' ');
       }
-      //println( ' ');
       plotdata();
     }
-  }
-}
-
-void keyPressed() {
-
-  if (key == 'c' ) 
-  {
-    for (int i = 0; i < summed.length; i++) 
-    {
-      summed[i] = 0;
-    }
-  } else if (key == 't' ) 
-  {
-    if (draw_sum==1)
-    {
-      draw_sum = 0;
-    } else
-    {
-      draw_sum = 1;
-    }
-  } else 
-  {
   }
 }
 
@@ -508,4 +466,5 @@ float[] irradiance_cal = {
   362.132, 
   354.005, 
   345.878, 
-  337.751};
+  337.751
+};
