@@ -27,8 +27,10 @@ This repository contains resources for debugging a system consisting of an Ardui
 - [Processing IDE](https://processing.org/download)
 
 ### Code
+
 [Arduino code](https://github.com/fenichel/spectrometer/blob/master/arduino_c12880ma_example/arduino_c12880ma_example.ino)
 - Reads data from the spectrometer and writes it to serial
+
 [Processing code](https://github.com/groupgets/c12880ma/blob/master/processing_plot_c12880ma/processing_plot_c12880ma.pde)
  - Reads data from serial and displays a colorful graph
 
