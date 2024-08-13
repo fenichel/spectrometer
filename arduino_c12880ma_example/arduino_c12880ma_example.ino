@@ -29,7 +29,6 @@ void setup() {
  * Look at the Timing Chart in the Datasheet for more info
  */
 void readSpectrometer() {
-  int delayTime = 1;
 
   // Start clock cycle and set start pulse to signal start
   digitalWrite(SPEC_CLK, LOW);
@@ -41,7 +40,7 @@ void readSpectrometer() {
   delayMicroseconds(delayTime);
 
   // Sample for a period of time
-  for(int i = 0; i < 15; i++){
+  for (int i = 0; i < 15; i++){
       digitalWrite(SPEC_CLK, HIGH);
       delayMicroseconds(delayTime);
       digitalWrite(SPEC_CLK, LOW);
@@ -52,7 +51,7 @@ void readSpectrometer() {
   digitalWrite(SPEC_ST, LOW);
 
   // Sample for a period of time
-  for(int i = 0; i < 85; i++){
+  for (int i = 0; i < 85; i++){
       digitalWrite(SPEC_CLK, HIGH);
       delayMicroseconds(delayTime);
       digitalWrite(SPEC_CLK, LOW);
@@ -66,7 +65,7 @@ void readSpectrometer() {
   delayMicroseconds(delayTime);
 
   // Read from SPEC_VIDEO
-  for(int i = 0; i < SPEC_CHANNELS; i++){
+  for (int i = 0; i < SPEC_CHANNELS; i++){
       data[i] = analogRead(SPEC_VIDEO);
       
       digitalWrite(SPEC_CLK, HIGH);
@@ -79,7 +78,7 @@ void readSpectrometer() {
   digitalWrite(SPEC_ST, HIGH);
 
   // Sample for a small amount of time
-  for(int i = 0; i < 7; i++){    
+  for (int i = 0; i < 7; i++){    
       digitalWrite(SPEC_CLK, HIGH);
       delayMicroseconds(delayTime);
       digitalWrite(SPEC_CLK, LOW);

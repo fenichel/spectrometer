@@ -22,11 +22,11 @@ float lin_b = 3.89444;
 int dark_value = 110;
 float max_value = 850;
 
-int window_height = 800;
+int bottom_spacing = 40;
+int window_height = 1024+bottom_spacing;
 int min_wavelength = 317;
 int max_wavelength = 891;
-int width_multiplier = 8;
-int bottom_spacing = 40;
+int width_multiplier = 4;
 
 /** Return the maximum value in an array of doubles. **/
 double find_max(double[] input) {
@@ -44,7 +44,6 @@ void plotdata() {
   for (int i = 0; i < output.length; i++) {
     float x = width_multiplier * (wavelengths[i] - 315);
     float y1 = window_height - bottom_spacing;
-    float y2 = window_height - irrad[i] * window_height / 0.6;
     
     line(x, y1, x, y2);
     strokeWeight(width_multiplier + 3);
@@ -53,7 +52,7 @@ void plotdata() {
     stroke(rgbWavelengths[0], rgbWavelengths[1], rgbWavelengths[2]);
 
     if (i % 13 == 0) {
-      println(int(wavelengths[i]));
+      //println(int(wavelengths[i]));
       textSize(20);
       text(int(wavelengths[i]), width_multiplier*(wavelengths[i]- 315), window_height-10);
       fill(200);
@@ -70,6 +69,8 @@ float scale_wavelength(int pix) {
     B5 * pix * pix * pix * pix * pix;
 }
 
+// Compensates for differences in the sensor's response, which
+// is nonlinear with the number of photons received.
 float scale_linearity(int count) {
   return (count / (lin_a * log((count + 1) * lin_b)));
 }
@@ -91,9 +92,12 @@ void setup() {
 
   colorMode(RGB, 400);
 
+  // Initialize the arrays.
   for (int i = 0; i < 288; i++) {
     summed[i] = 0;
     output[i] = 0;
+    // The wavelength buckets are not evenly placed.
+    // scale_wavelength maps from bucket number to wavelength.
     wavelengths[i] = scale_wavelength(i);
   }
 }
@@ -102,11 +106,14 @@ void draw() {
   if ( myPort.available() > 0) {  
     val = myPort.readStringUntil('\n');         // read it and store it in val
     if (val != null) {
+      // Entries in data are between 0 and 1024.
       data = int(split(val, ','));
       for (int i = 0; i < data.length; i++) {
         if (i < summed.length) {
-          output[i] = scale_linearity(data[i] - dark_value);
-          irrad[i] = scale_linearity(data[i] - dark_value) / irradiance_cal[i];
+          float scaled_value = scale_linearity(data[i] - dark_value);
+          println(i, data[i], scaled_value);
+          output[i] = scaled_value;
+          irrad[i] = scaled_value / irradiance_cal[i];
           summed[i] += data[i];
         }
       }
@@ -178,6 +185,12 @@ int[] waveLengthToRGB(double Wavelength) {
 
   return rgb;
 }
+
+
+// The sensor responds differently to different wavelengths of light
+// because it has a diffraction grating and a mirror.
+// This array is specific to this sensor and contains one entry per
+// wavelength bucket (288 total).
 float[] irradiance_cal = {
   1244.452738, 
   1325.101981, 
