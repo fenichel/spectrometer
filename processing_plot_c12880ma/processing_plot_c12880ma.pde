@@ -23,10 +23,10 @@ int dark_value = 110;
 float max_value = 850;
 
 int bottom_spacing = 40;
-int window_height = 1024+bottom_spacing;
+int window_height = 1024;
 int min_wavelength = 317;
 int max_wavelength = 891;
-int width_multiplier = 4;
+int width_multiplier = 8;
 
 /** Return the maximum value in an array of doubles. **/
 double find_max(double[] input) {
@@ -44,6 +44,7 @@ void plotdata() {
   for (int i = 0; i < output.length; i++) {
     float x = width_multiplier * (wavelengths[i] - 315);
     float y1 = window_height - bottom_spacing;
+    float y2 = window_height - irrad[i] * window_height / 0.6;
     
     line(x, y1, x, y2);
     strokeWeight(width_multiplier + 3);
