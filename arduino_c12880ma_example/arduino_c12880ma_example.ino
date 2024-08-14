@@ -29,6 +29,7 @@ void setup() {
  * Look at the Timing Chart in the Datasheet for more info
  */
 void readSpectrometer() {
+  int delayTime = 5;
 
   // Start clock cycle and set start pulse to signal start
   digitalWrite(SPEC_CLK, LOW);
